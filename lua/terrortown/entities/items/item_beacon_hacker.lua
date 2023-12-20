@@ -104,7 +104,7 @@ if CLIENT then
 
 	net.Receive("TTT2BhackerBrought", function()
 		RunConsoleCommand("ttt_cl_traitorpopup_close")
-		RunConsoleCommand("ttt_cl_traitorpopup_tab", trans("bhacker_menutitle"))
+		RunConsoleCommand("ttt_cl_traitorpopup") --RunConsoleCommand("ttt_cl_traitorpopup_tab", trans("bhacker_menutitle"))
 	end)
 
 end
@@ -159,6 +159,15 @@ if SERVER then
 		concommand.Add("ttt_set_bhacker_" .. control.name, SetBhackerControl)
 	end
 
+	function IsBeaconInRange(beacon, hacker)
+
+		local beaconDetectionRange = 135 --TODO make this a convar in base TTT2?
+
+		local DetectionRangeSquared = beaconDetectionRange * beaconDetectionRange
+
+		return beacon:GetPos():DistToSqr(hacker:GetPos()) < DetectionRangeSquared
+	end
+
 	hook.Add("TTT2PlayerReady", "TTTItemBeaconHackerPlayerReady", function(ply)
 		ply:SetNWVarProxy("bhacker_on", function(ent, name, old, new)
 			if not IsValid(ent) or not ent:IsPlayer() then return end
@@ -171,11 +180,87 @@ if SERVER then
 		end)
 	end)
 
+	hook.Add("TTT2BeaconDetectPlayer","TTT2BeaconHackerDetectPlayer", function(beacon, ent)
+
+		local InRange = IsBeaconInRange(beacon, self)
+
+		local settings = GetHackerSettings()
+
+		if settings["on"] ~= true then return end
+
+		local ReportDetection = true
+
+		local DetectedOwner = ent == self:GetOwner()
+
+		if settings["emp"] == true then
+			if InRange then return false end
+		end
+
+		if settings["cloak"] == true then
+			if DetectedOwner then
+				ReportDetection = false
+			end
+		end
+
+		if settings["alert"] == true then
+			if DetectedOwner then
+				LANG.Msg(self:GetOwner(), "bhacker_detected", nil, MSG_MSTACK_WARN)
+			end
+		end
+
+		if settings["spy"] == true then
+			if DetectedOwner then
+				--Send network message to owner's client and mark the beacon's owner. Alternatively, should this be done in a think?
+			end
+		end
+
+		return ReportDetection
+
+	end)
+
+	hook.Add("TTT2BeaconDeathNotify","TTT2BeaconHackerDeathNotify", function(beacon, victim)
+
+		local InRange = IsBeaconInRange(beacon, self)
+
+		local settings = GetHackerSettings()
+
+		if settings["on"] ~= true then return end
+
+		local ReportDetection = true
+
+		local DetectedOwner = ent == self:GetOwner()
+
+		if settings["emp"] == true then
+			if InRange then return false end
+		end
+
+		if settings["cloak"] == true then
+			if DetectedOwner then
+				ReportDetection = false
+			end
+		end
+
+		return ReportDetection
+
+	end)
+
 end
 
 
--- THE TODO LIST
+function GetHackerSettings()
 
---- remove keybinding when no longer have the equipment
---- 
---- Icons
+	local ply
+	local settings = {}
+
+	if CLIENT then
+		ply = LocalPlayer()
+	elseif SERVER then
+		ply = self:GetOwner()
+	end
+
+	for _, control in pairs(bhacker_controls) do
+		settings[control.name] = ply:GetNWBool(ControlName, control.default)
+	end
+
+	return settings
+end

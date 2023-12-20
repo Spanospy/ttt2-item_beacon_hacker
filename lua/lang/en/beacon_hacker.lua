@@ -14,7 +14,9 @@ L["label_keyhelper_beacon_hacker"] = "toggle beacon hacker"
 L["item_disguiser_sidebar"] = "The beacon hacker allows you to exploit beacons to gain an advantage."
 
 L["bhacker_turned_on"] = "Beacon Hacker enabled!"
-L["bhacker_turned_off"] = "Beacon hacker disabled."
+L["bhacker_turned_off"] = "Beacon Hacker disabled."
+
+L["bhacker_detected"] = "Your Beacon Hacker has detected a beacon!"
 
 L["label_bhacker_on"] = "Enable Beacon Hacker"
 L["label_bhacker_cloak"] = "Cloak yourself from beacons"
