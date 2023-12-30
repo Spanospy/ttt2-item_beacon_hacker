@@ -180,7 +180,7 @@ if SERVER then
 		end)
 	end)
 
-	hook.Add("TTT2BeaconDetectPlayer","TTT2BeaconHackerDetectPlayer", function(beacon, ent)
+	hook.Add("TTT2BeaconDetectPlayer","TTT2BeaconHackerDetectPlayer", function(ent, beacon)
 
 		local InRange = IsBeaconInRange(beacon, self)
 
@@ -210,7 +210,7 @@ if SERVER then
 
 		if settings["spy"] == true then
 			if DetectedOwner then
-				--Send network message to owner's client and mark the beacon's owner. Alternatively, should this be done in a think?
+				--Send network message to owner's client and mark the beacon's owner. Alternatively, should this be done in the hacker's own think() rather than the beacon's?
 			end
 		end
 
@@ -218,7 +218,7 @@ if SERVER then
 
 	end)
 
-	hook.Add("TTT2BeaconDeathNotify","TTT2BeaconHackerDeathNotify", function(beacon, victim)
+	hook.Add("TTT2BeaconDeathNotify","TTT2BeaconHackerDeathNotify", function(victim, beacon)
 
 		local InRange = IsBeaconInRange(beacon, self)
 
